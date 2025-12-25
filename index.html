@@ -2,110 +2,179 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Typing Track Game</title>
+<title>Bible Type</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #1e1e1e;
-        color: white;
-        overflow: hidden;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    color: white;
+}
 
-    /* Track */
-    #track {
-        position: relative;
-        width: 100%;
-        height: 70vh;
-        background: linear-gradient(#555 0%, #444 100%);
-        border-top: 6px dashed #ccc;
-    }
+/* HOME */
+#home, #results {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
 
-    /* Car */
-    #car {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        font-size: 48px;
-        transition: left 0.2s ease;
-    }
+button {
+    font-size: 20px;
+    padding: 12px 26px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
 
-    /* Word area */
-    #word-area {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 30vh;
-        background: #111;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-    }
+/* GAME */
+#game { display: none; }
 
-    #word {
-        font-size: 36px;
-        font-weight: bold;
-    }
+#track {
+    height: 60vh;
+    background: linear-gradient(#555, #444);
+    border-top: 6px dashed #ccc;
+    position: relative;
+}
 
-    #input {
-        font-size: 24px;
-        padding: 10px;
-        width: 60%;
-        text-align: center;
-        border-radius: 6px;
-        border: none;
-        outline: none;
-    }
+#car {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    font-size: 48px;
+    transition: left 0.1s linear;
+}
+
+#typing {
+    height: 40vh;
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#verse {
+    max-width: 90%;
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.correct { color: #7fff00; }
+.incorrect { color: #ff5555; }
+
+#input {
+    width: 90%;
+    max-width: 600px;
+    font-size: 20px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 6px;
+    border: none;
+}
 </style>
 </head>
 
 <body>
 
-<div id="track">
-    <div id="car">🚗</div>
+<div id="home">
+    <h1>Bible Type</h1>
+    <p>Type God’s Word. Improve speed and accuracy.</p>
+    <button onclick="startGame()">Start Race</button>
 </div>
 
-<div id="word-area">
-    <div id="word"></div>
-    <input id="input" type="text" placeholder="Type the word here..." autofocus />
+<div id="game">
+    <div id="track">
+        <div id="car">🚗</div>
+    </div>
+    <div id="typing">
+        <div id="verse"></div>
+        <input id="input" placeholder="Start typing…" autocomplete="off">
+    </div>
+</div>
+
+<div id="results">
+    <h2>Race Complete 🏁</h2>
+    <p id="wpm"></p>
+    <p id="accuracy"></p>
+    <h3>Best WPM</h3>
+    <p id="best"></p>
+    <button onclick="location.reload()">Race Again</button>
 </div>
 
 <script>
-const words = [
-    { text: "faith", color: "#ffd700", font: "Georgia" },
-    { text: "grace", color: "#00bfff", font: "Courier New" },
-    { text: "hope", color: "#7fff00", font: "Verdana" },
-    { text: "truth", color: "#ff69b4", font: "Times New Roman" },
-    { text: "love", color: "#ff4500", font: "Arial Black" }
+// KJV (PUBLIC DOMAIN)
+const verses = [
+    "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+    "The LORD is my shepherd; I shall not want.",
+    "I can do all things through Christ which strengtheneth me."
 ];
 
-let currentWord = {};
-let carPosition = 20;
+let verse = "";
+let startTime;
+let finished = false;
 
-const wordEl = document.getElementById("word");
+const verseEl = document.getElementById("verse");
 const inputEl = document.getElementById("input");
 const carEl = document.getElementById("car");
 
-function newWord() {
-    currentWord = words[Math.floor(Math.random() * words.length)];
-    wordEl.textContent = currentWord.text;
-    wordEl.style.color = currentWord.color;
-    wordEl.style.fontFamily = currentWord.font;
+function startGame() {
+    verse = verses[Math.floor(Math.random() * verses.length)];
+    document.getElementById("home").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    verseEl.innerHTML = verse;
     inputEl.value = "";
+    inputEl.focus();
+    startTime = new Date();
 }
 
 inputEl.addEventListener("input", () => {
-    if (inputEl.value === currentWord.text) {
-        carPosition += 80;
-        carEl.style.left = carPosition + "px";
-        newWord();
+    if (finished) return;
+
+    let html = "";
+    let correct = 0;
+
+    for (let i = 0; i < verse.length; i++) {
+        if (inputEl.value[i] === verse[i]) {
+            html += `<span class="correct">${verse[i]}</span>`;
+            correct++;
+        } else if (inputEl.value[i]) {
+            html += `<span class="incorrect">${verse[i]}</span>`;
+        } else {
+            html += verse[i];
+        }
     }
+
+    verseEl.innerHTML = html;
+
+    const progress = correct / verse.length;
+    carEl.style.left = 20 + progress * (window.innerWidth - 100) + "px";
+
+    if (inputEl.value === verse) finish(correct);
 });
 
-newWord();
+function finish(correct) {
+    finished = true;
+    document.getElementById("game").style.display = "none";
+    document.getElementById("results").style.display = "flex";
+
+    const minutes = (new Date() - startTime) / 60000;
+    const wpm = Math.round((verse.split(" ").length) / minutes);
+    const accuracy = Math.round((correct / verse.length) * 100);
+
+    document.getElementById("wpm").textContent = `WPM: ${wpm}`;
+    document.getElementById("accuracy").textContent = `Accuracy: ${accuracy}%`;
+
+    const best = Math.max(wpm, localStorage.getItem("bestWPM") || 0);
+    localStorage.setItem("bestWPM", best);
+    document.getElementById("best").textContent = best;
+}
 </script>
 
 </body>
