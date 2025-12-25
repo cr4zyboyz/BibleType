@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Typing Track Game</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #1e1e1e;
+        color: white;
+        overflow: hidden;
+    }
+
+    /* Track */
+    #track {
+        position: relative;
+        width: 100%;
+        height: 70vh;
+        background: linear-gradient(#555 0%, #444 100%);
+        border-top: 6px dashed #ccc;
+    }
+
+    /* Car */
+    #car {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        font-size: 48px;
+        transition: left 0.2s ease;
+    }
+
+    /* Word area */
+    #word-area {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 30vh;
+        background: #111;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    #word {
+        font-size: 36px;
+        font-weight: bold;
+    }
+
+    #input {
+        font-size: 24px;
+        padding: 10px;
+        width: 60%;
+        text-align: center;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="track">
+    <div id="car">🚗</div>
+</div>
+
+<div id="word-area">
+    <div id="word"></div>
+    <input id="input" type="text" placeholder="Type the word here..." autofocus />
+</div>
+
+<script>
+const words = [
+    { text: "faith", color: "#ffd700", font: "Georgia" },
+    { text: "grace", color: "#00bfff", font: "Courier New" },
+    { text: "hope", color: "#7fff00", font: "Verdana" },
+    { text: "truth", color: "#ff69b4", font: "Times New Roman" },
+    { text: "love", color: "#ff4500", font: "Arial Black" }
+];
+
+let currentWord = {};
+let carPosition = 20;
+
+const wordEl = document.getElementById("word");
+const inputEl = document.getElementById("input");
+const carEl = document.getElementById("car");
+
+function newWord() {
+    currentWord = words[Math.floor(Math.random() * words.length)];
+    wordEl.textContent = currentWord.text;
+    wordEl.style.color = currentWord.color;
+    wordEl.style.fontFamily = currentWord.font;
+    inputEl.value = "";
+}
+
+inputEl.addEventListener("input", () => {
+    if (inputEl.value === currentWord.text) {
+        carPosition += 80;
+        carEl.style.left = carPosition + "px";
+        newWord();
+    }
+});
+
+newWord();
+</script>
+
+</body>
+</html>
